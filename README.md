@@ -277,10 +277,11 @@ Example: `hwiwonlee/secb.eval.x86_64.mruby.cve-2022-0240`
 If you use SEC-bench in your research, please cite our paper:
 
 ```bibtex
-@article{lee2025sec,
-  title={SEC-bench: Automated Benchmarking of LLM Agents on Real-World Software Security Tasks},
-  author={Lee, Hwiwon and Zhang, Ziqi and Lu, Hanxiao and Zhang, Lingming},
-  journal={arXiv preprint arXiv:2506.11791},
-  year={2025}
+@inproceedings{lee2025secbench,
+  author    = {Hwiwon Lee and Ziqi Zhang and Hanxiao Lu and Lingming Zhang},
+  booktitle = {The Thirty-ninth Annual Conference on Neural Information Processing Systems},
+  title     = {{SEC-bench: Automated Benchmarking of LLM Agents on Real-World Software Security Tasks}},
+  url       = {https://openreview.net/forum?id=QQhQIqons0},
+  year      = {2025}
 }
 ```
