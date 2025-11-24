@@ -2,10 +2,10 @@
 """SEC-bench Evaluation Module.
 
 This module provides functionality for evaluating vulnerability detection and patching
-using different agents (SWEA, OpenHands, Aider) against SEC-bench instances.
+using different agents (SWE-agent, OpenHands, Aider) against SEC-bench instances.
 
 Features:
-- Support for multiple agent formats (SWEA, OpenHands, Aider)
+- Support for multiple agent formats (SWE-agent, OpenHands, Aider)
 - Parallel evaluation with configurable workers
 - Docker-based evaluation environment
 - Patch and PoC evaluation modes
@@ -105,10 +105,10 @@ class PoCResult:
 
 # Agent preprocessing functions
 def preprocess_swea_patch(input_dir: Path) -> Dict[str, str]:
-    """Preprocess patch data from SWEA agent format.
+    """Preprocess patch data from SWE-agent format.
 
     Args:
-        input_dir: Directory containing SWEA agent prediction data.
+        input_dir: Directory containing SWE-agent prediction data.
 
     Returns:
         Dictionary mapping instance_id to model_patch.
@@ -127,10 +127,10 @@ def preprocess_swea_patch(input_dir: Path) -> Dict[str, str]:
 
         for instance_id, pd in patch_data.items():
             if not instance_id:
-                logger.warning("Missing instance_id in SWEA patch data")
+                logger.warning("Missing instance_id in SWE-agent patch data")
                 continue
 
-            # SWEA format has model_patch inside the dictionary
+            # SWE-agent format has model_patch inside the dictionary
             model_patch = pd.get("model_patch", "")
             if model_patch is None or model_patch == "":
                 logger.warning(
@@ -140,16 +140,16 @@ def preprocess_swea_patch(input_dir: Path) -> Dict[str, str]:
 
             processed_patches[instance_id] = model_patch
     except Exception as e:
-        logger.error(f"Error processing SWEA patch data: {e}")
+        logger.error(f"Error processing SWE-agent patch data: {e}")
 
     return processed_patches
 
 
 def preprocess_swea_poc(input_dir: Path) -> Dict[str, str]:
-    """Preprocess PoC data from SWEA agent format.
+    """Preprocess PoC data from SWE-agent format.
 
     Args:
-        input_dir: Directory containing SWEA agent prediction data.
+        input_dir: Directory containing SWE-agent prediction data.
 
     Returns:
         Dictionary mapping instance_id to model_poc.
@@ -168,10 +168,10 @@ def preprocess_swea_poc(input_dir: Path) -> Dict[str, str]:
 
         for instance_id, pd in patch_data.items():
             if not instance_id:
-                logger.warning("Missing instance_id in SWEA patch data")
+                logger.warning("Missing instance_id in SWE-agent patch data")
                 continue
 
-            # SWEA format has model_patch inside the dictionary
+            # SWE-agent format has model_patch inside the dictionary
             # NOTE: we use model_patch for now as current SWE-agent saves the poc artifact in model_patch field
             model_poc = pd.get("model_patch", "")
             if model_poc is None or model_poc == "":
@@ -182,7 +182,7 @@ def preprocess_swea_poc(input_dir: Path) -> Dict[str, str]:
 
             processed_poc[instance_id] = model_poc
     except Exception as e:
-        logger.error(f"Error processing SWEA patch data: {e}")
+        logger.error(f"Error processing SWE-agent patch data: {e}")
 
     return processed_poc
 
@@ -225,7 +225,7 @@ def preprocess_oh_patch(input_dir: Path) -> Dict[str, str]:
 
                 if git_patch is None or git_patch == "":
                     logger.warning(
-                        f"Null git_patch for instance {instance_id}, using empty string"
+                        f"Empty git_patch for instance {instance_id}, using empty string"
                     )
                     git_patch = ""
 
@@ -274,7 +274,7 @@ def preprocess_oh_poc(input_dir: Path) -> Dict[str, str]:
 
                 if poc_artifact is None or poc_artifact == "":
                     logger.warning(
-                        f"Null poc_artifact for instance {instance_id}, using empty string"
+                        f"Empty poc_artifact for instance {instance_id}, using empty string"
                     )
                     poc_artifact = ""
 
@@ -494,7 +494,7 @@ def preprocess_smolagent_patch(input_dir: Path) -> Dict[str, str]:
 
                     if git_patch is None or git_patch == "":
                         logger.warning(
-                            f"Null git_patch for instance {instance_id}, using empty string"
+                            f"Empty git_patch for instance {instance_id}, using empty string"
                         )
                         git_patch = ""
 
@@ -541,7 +541,7 @@ def preprocess_smolagent_patch(input_dir: Path) -> Dict[str, str]:
 
                     if git_patch is None or git_patch == "":
                         logger.warning(
-                            f"Null git_patch for instance {instance_id}, using empty string"
+                            f"Empty git_patch for instance {instance_id}, using empty string"
                         )
                         git_patch = ""
 
@@ -592,7 +592,7 @@ def preprocess_smolagent_poc(input_dir: Path) -> Dict[str, str]:
 
                     if poc_artifact is None or poc_artifact == "":
                         logger.warning(
-                            f"Null poc_artifact for instance {instance_id}, using empty string"
+                            f"Empty poc_artifact for instance {instance_id}, using empty string"
                         )
                         poc_artifact = ""
 
@@ -639,7 +639,7 @@ def preprocess_smolagent_poc(input_dir: Path) -> Dict[str, str]:
 
                     if poc_artifact is None or poc_artifact == "":
                         logger.warning(
-                            f"Null poc_artifact for instance {instance_id}, using empty string"
+                            f"Empty poc_artifact for instance {instance_id}, using empty string"
                         )
                         poc_artifact = ""
 
@@ -945,7 +945,7 @@ def run_evaluation(
         instance_exists = instance_id in dataset_dict
 
         if not model_input:
-            logger.error(
+            logger.warning(
                 f"The model failed to submit input for instance {instance_id}. Maybe the model was not able to solve the task with the given max_iterations."
             )
             # Create a failed evaluation result
