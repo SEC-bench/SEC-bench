@@ -455,11 +455,207 @@ def preprocess_aider_poc(input_dir: Path) -> Dict[str, Tuple[str, str]]:
     return processed_poc
 
 
+def preprocess_smolagent_patch(input_dir: Path) -> Dict[str, str]:
+    """Preprocess patch data from smolagent format.
+
+    Supports two directory structures:
+    1. Flat structure: input_dir/output.jsonl (single file with all instances)
+    2. Per-instance structure: input_dir/instance_id/output.jsonl (one subdirectory per instance)
+
+    Args:
+        input_dir: Directory containing smolagent prediction data.
+
+    Returns:
+        Dictionary mapping instance_id to git_patch.
+    """
+    processed_patches: Dict[str, str] = {}
+
+    # First, try flat structure: look for output.jsonl in the input directory
+    output_file = input_dir / "output.jsonl"
+    if output_file.exists():
+        try:
+            with output_file.open() as f:
+                # Process each line separately as this is a JSONL file
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+
+                    data = json.loads(line)
+                    instance_id = data.get("instance_id")
+
+                    if not instance_id:
+                        logger.warning("Missing instance_id in smolagent patch data")
+                        continue
+
+                    # Extract git_patch from test_result
+                    test_result = data.get("test_result", {})
+                    git_patch = test_result.get("git_patch", "")
+
+                    if git_patch is None or git_patch == "":
+                        logger.warning(
+                            f"Null git_patch for instance {instance_id}, using empty string"
+                        )
+                        git_patch = ""
+
+                    processed_patches[instance_id] = git_patch
+            logger.info(f"Processed {len(processed_patches)} patches from flat structure")
+            return processed_patches
+        except Exception as e:
+            logger.error(f"Error processing smolagent patch data from flat structure: {e}")
+
+    # If flat structure not found, try per-instance structure
+    # Look for subdirectories (one per instance)
+    instance_dirs = [d for d in input_dir.iterdir() if d.is_dir()]
+    
+    if not instance_dirs:
+        logger.error(f"No output.jsonl found in {input_dir} and no instance subdirectories found")
+        return processed_patches
+
+    logger.info(f"Processing {len(instance_dirs)} instance directories")
+    for instance_dir in instance_dirs:
+        instance_output_file = instance_dir / "output.jsonl"
+        if not instance_output_file.exists():
+            logger.debug(f"output.jsonl not found in {instance_dir}, skipping")
+            continue
+
+        try:
+            with instance_output_file.open() as f:
+                # Process each line separately as this is a JSONL file
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+
+                    data = json.loads(line)
+                    # Get instance_id from JSON or fall back to directory name
+                    instance_id = data.get("instance_id") or instance_dir.name
+
+                    if not instance_id:
+                        logger.warning(f"Missing instance_id in {instance_output_file}, skipping")
+                        continue
+
+                    # Extract git_patch from test_result
+                    test_result = data.get("test_result", {})
+                    git_patch = test_result.get("git_patch", "")
+
+                    if git_patch is None or git_patch == "":
+                        logger.warning(
+                            f"Null git_patch for instance {instance_id}, using empty string"
+                        )
+                        git_patch = ""
+
+                    processed_patches[instance_id] = git_patch
+        except Exception as e:
+            logger.error(f"Error processing smolagent patch data from {instance_dir}: {e}")
+
+    logger.info(f"Processed {len(processed_patches)} patches from per-instance structure")
+    return processed_patches
+
+
+def preprocess_smolagent_poc(input_dir: Path) -> Dict[str, str]:
+    """Preprocess PoC data from smolagent format.
+
+    Supports two directory structures:
+    1. Flat structure: input_dir/output.jsonl (single file with all instances)
+    2. Per-instance structure: input_dir/instance_id/output.jsonl (one subdirectory per instance)
+
+    Args:
+        input_dir: Directory containing smolagent prediction data.
+
+    Returns:
+        Dictionary mapping instance_id to poc_artifact.
+    """
+    processed_poc: Dict[str, str] = {}
+
+    # First, try flat structure: look for output.jsonl in the input directory
+    output_file = input_dir / "output.jsonl"
+    if output_file.exists():
+        try:
+            with output_file.open() as f:
+                # Process each line separately as this is a JSONL file
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+
+                    data = json.loads(line)
+                    instance_id = data.get("instance_id")
+
+                    if not instance_id:
+                        logger.warning("Missing instance_id in smolagent PoC data")
+                        continue
+
+                    # Extract poc_artifact from test_result
+                    test_result = data.get("test_result", {})
+                    poc_artifact = test_result.get("poc_artifact", "")
+
+                    if poc_artifact is None or poc_artifact == "":
+                        logger.warning(
+                            f"Null poc_artifact for instance {instance_id}, using empty string"
+                        )
+                        poc_artifact = ""
+
+                    processed_poc[instance_id] = poc_artifact
+            logger.info(f"Processed {len(processed_poc)} PoC artifacts from flat structure")
+            return processed_poc
+        except Exception as e:
+            logger.error(f"Error processing smolagent PoC data from flat structure: {e}")
+
+    # If flat structure not found, try per-instance structure
+    # Look for subdirectories (one per instance)
+    instance_dirs = [d for d in input_dir.iterdir() if d.is_dir()]
+    
+    if not instance_dirs:
+        logger.error(f"No output.jsonl found in {input_dir} and no instance subdirectories found")
+        return processed_poc
+
+    logger.info(f"Processing {len(instance_dirs)} instance directories")
+    for instance_dir in instance_dirs:
+        instance_output_file = instance_dir / "output.jsonl"
+        if not instance_output_file.exists():
+            logger.debug(f"output.jsonl not found in {instance_dir}, skipping")
+            continue
+
+        try:
+            with instance_output_file.open() as f:
+                # Process each line separately as this is a JSONL file
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+
+                    data = json.loads(line)
+                    # Get instance_id from JSON or fall back to directory name
+                    instance_id = data.get("instance_id") or instance_dir.name
+
+                    if not instance_id:
+                        logger.warning(f"Missing instance_id in {instance_output_file}, skipping")
+                        continue
+
+                    # Extract poc_artifact from test_result
+                    test_result = data.get("test_result", {})
+                    poc_artifact = test_result.get("poc_artifact", "")
+
+                    if poc_artifact is None or poc_artifact == "":
+                        logger.warning(
+                            f"Null poc_artifact for instance {instance_id}, using empty string"
+                        )
+                        poc_artifact = ""
+
+                    processed_poc[instance_id] = poc_artifact
+        except Exception as e:
+            logger.error(f"Error processing smolagent PoC data from {instance_dir}: {e}")
+
+    logger.info(f"Processed {len(processed_poc)} PoC artifacts from per-instance structure")
+    return processed_poc
+
+
 def get_preprocessor(agent: str, task_type: str = "patch"):
     """Returns the appropriate preprocessor function based on agent type and task type.
 
     Args:
-        agent: The agent type (swea, oh, aider)
+        agent: The agent type (swea, oh, aider, smolagent)
         task_type: The task type (patch or poc)
 
     Returns:
@@ -477,6 +673,10 @@ def get_preprocessor(agent: str, task_type: str = "patch"):
         "aider": {
             "patch": preprocess_aider_patch,
             "poc": preprocess_aider_poc,
+        },
+        "smolagent": {
+            "patch": preprocess_smolagent_patch,
+            "poc": preprocess_smolagent_poc,
         },
     }
 
@@ -685,7 +885,7 @@ def run_evaluation(
         input_dir: Path to the directory containing input
         dataset_dict: Dictionary of dataset items
         num_workers: Number of parallel workers to use
-        agent: Agent type (swea, oh, aider) for preprocessing input
+        agent: Agent type (swea, oh, aider, smolagent) for preprocessing input
         type: Type of evaluation to run (patch or poc)
 
     Returns:
@@ -1022,12 +1222,12 @@ def save_results(
         results: List of PatchResult or PoCResult objects
         output_path: Path to input directory
         mode: Evaluation mode used
-        agent: Agent type (swea, oh, aider)
+        agent: Agent type (swea, oh, aider, smolagent)
         output_dir: Optional output directory to save results
     """
     # If output_dir is provided, use it to save results
     if output_dir:
-        if agent in ["swea", "oh"]:
+        if agent in ["swea", "oh", "smolagent"]:
             # Create output directory if it doesn't exist
             output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -1067,8 +1267,8 @@ def save_results(
         return
 
     # If no output_dir is provided, use agent-specific behavior
-    if agent in ["swea", "oh"]:
-        # For swea and oh, save in the input directory
+    if agent in ["swea", "oh", "smolagent"]:
+        # For swea, oh, and smolagent, save in the input directory
         filename = f"report_{mode}.jsonl"
         report_path = output_path / filename
     else:  # aider
@@ -1179,7 +1379,7 @@ def main():
     )
     parser.add_argument(
         "--agent",
-        choices=["swea", "oh", "aider"],
+        choices=["swea", "oh", "aider", "smolagent"],
         default="swea",
         help="Agent type that generated the patches (default: swea)",
     )

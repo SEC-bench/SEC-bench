@@ -230,7 +230,7 @@ python -m secb.evaluator.eval_instances \
 **Parameters:**
 - `type`: Evaluation type (`patch` or `poc`)
 - `split`: Dataset split to evaluate
-- `agent`: Agent type (`swea`, `oh`, `aider`)
+- `agent`: Agent type (`swea`, `oh`, `aider`, `smolagent`)
 - `num-workers`: Number of parallel workers
 
 ### 📊 Results Viewing
