@@ -172,9 +172,13 @@ cython_debug/
 
 # SEC-bench
 output/
+results/
 logs/
 workspace/
 projects/
+
+config.toml
+
 
 # VSCode
 .vscode/
