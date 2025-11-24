@@ -15,3 +15,4 @@ beautifulsoup4
 jinja2
 poetry
 nvdlib
+smolagents @ git+https://github.com/SEC-bench/smolagents.git@main

@@ -1,0 +1,85 @@
+# SEC-bench Evaluation Configuration
+# This configuration file is used by the `secb-run` subcommand to run ToolCallingAgent
+# or CodeAgent evaluations on SEC-bench instances.
+
+# Model configuration
+[model]
+# Model type: "InferenceClientModel", "OpenAIModel", "LiteLLMModel", or "TransformersModel"
+type = "LiteLLMModel"
+# Model identifier (e.g., "meta-llama/Meta-Llama-3.1-8B-Instruct" for InferenceClientModel)
+model_id = "gpt-5-mini"
+# Optional: API key (can also be set via environment variable HF_API_KEY, OPENAI_API_KEY, etc.)
+api_key = "your-api-key-here"
+# Optional: API base URL for custom endpoints
+# api_base = "https://api.example.com/v1"
+# Optional: Provider for InferenceClientModel (e.g., "together", "huggingface")
+# provider = "together"
+
+# Agent configuration
+[agent]
+# Agent type: "ToolCallingAgent" or "CodeAgent"
+type = "ToolCallingAgent"
+# Maximum number of steps the agent can take
+max_steps = 30
+# Verbosity level (0=quiet, 1=info, 2=debug)
+verbosity_level = 1
+# List of enabled tools (available: "python_interpreter", "duckduckgo_search", "visit_webpage")
+tools = [
+    "python_interpreter",
+    "cmd",
+]
+# Optional: Additional authorized imports for CodeAgent
+# additional_imports = ["numpy", "pandas"]
+
+# Dataset configuration
+[dataset]
+# Dataset name from HuggingFace
+name = "SEC-bench/SEC-bench"
+# Dataset split to use: "eval", "cve", or "oss"
+split = "eval"
+# Optional: Filter by specific instance IDs
+instance_ids = [
+    "wasm3.ossfuzz-42496369",
+    "njs.cve-2022-32414",
+]
+
+# Output configuration
+[output]
+# Base output directory for evaluation results
+# A timestamp-based subdirectory will be created under this directory for each run session
+# Example: if output_dir = "./results", results will be saved to "./results/20250101_120000/instance_id/"
+output_dir = "/path/to/output/directory"
+
+# Docker runtime configuration
+[docker]
+# Docker image prefix (instance_id and tag will be appended)
+image_prefix = "hwiwonlee/secb.eval.x86_64"
+# Optional: Git URL for smolagents installation (used when local repo is not available)
+# Defaults to "https://github.com/SEC-bench/smolagents.git"
+# smolagents_git_url = "https://github.com/SEC-bench/smolagents.git"
+# Optional: Git branch/tag/commit to checkout when installing from git
+# smolagents_git_branch = "main"
+# Docker run arguments
+[docker.run_kwargs]
+# Memory limit (default: 8g)
+mem_limit = "8g"
+# Network mode (default: "host" for host network access)
+network_mode = "host"
+# Automatically remove container after completion (default: true)
+auto_remove = true
+# Optional: Additional Docker run kwargs can be added here
+# cpu_count = 4
+# shm_size = "1g"
+
+# Task configuration
+[task]
+# Task type: "patch", "poc-repo", "poc-desc", or "poc-san"
+# - "patch": Vulnerability patching task
+# - "poc-repo": PoC generation with repository only
+# - "poc-desc": PoC generation with repository and bug description
+# - "poc-san": PoC generation with repository, bug description, and sanitizer report
+type = "poc-repo"
+# Timeout per instance in seconds (default: 3600 = 1 hour)
+timeout_seconds = 3600
+
+

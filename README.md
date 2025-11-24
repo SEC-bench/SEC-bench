@@ -29,7 +29,7 @@ SEC-bench is a comprehensive benchmarking framework designed to evaluate Large L
 
 - **🔍 Automated Benchmark Generation**: Automated benchmark generation from OSV database and CVE records by using multi-agentic system
 - **🐳 Containerized Environments**: Docker-based reproducible vulnerability instances
-- **🤖 Agent-oriented Evaluation**: Evaluate agents on critical software security tasks (SWE-agent, OpenHands, and Aider are supported)
+- **🤖 Agent-oriented Evaluation**: Evaluate agents on critical software security tasks (SWE-agent, OpenHands, Aider, and smolagents are supported)
 - **📊 Comprehensive Security Assessment**: Both PoC generation and vulnerability patching assessment with extensibility to other tasks (e.g., fuzzing, static analysis, etc.)
 - **📈 Rich Reporting**: Detailed progress tracking and result visualization with rich terminal output
 
@@ -232,6 +232,91 @@ python -m secb.evaluator.eval_instances \
 - `split`: Dataset split to evaluate
 - `agent`: Agent type (`swea`, `oh`, `aider`, `smolagent`)
 - `num-workers`: Number of parallel workers
+
+### 🤖 Running smolagent
+
+[smolagents](https://github.com/SEC-bench/smolagents) is a lightweight agent framework from Hugging Face that supports diverse scaffolds, such as `CodeAgent` and `ToolCallingAgent`. We extended it for SEC-bench evaluation. Once installed, you can run evaluations with a configuration file.
+
+#### Configuration
+
+Copy `config.example.toml` and customize it for your setup:
+
+```bash
+cp config.example.toml config.toml
+```
+
+Edit `config.toml` to configure:
+- **Model**: Set your model type, ID, and API keys
+- **Agent**: Choose `CodeAgent` or `ToolCallingAgent`, set max steps and tools
+- **Dataset**: Specify dataset split (`eval`, `cve`, or `oss`) and instance IDs
+- **Task**: Select task type (`patch`, `poc-repo`, `poc-desc`, or `poc-san`)
+- **Docker**: Configure Docker image prefix and runtime settings
+
+#### PoC Generation
+
+Generate proof-of-concept exploits for three scenarios:
+
+**1. PoC with Repository Only (`poc-repo`)**
+```bash
+# Set task.type = "poc-repo" in config.toml
+smolagent secb-run --config config.toml
+```
+
+**2. PoC with Repository and Bug Description (`poc-desc`)**
+```bash
+# Set task.type = "poc-desc" in config.toml
+smolagent secb-run --config config.toml
+```
+
+**3. PoC with Repository, Bug Description, and Sanitizer Report (`poc-san`)**
+```bash
+# Set task.type = "poc-san" in config.toml
+smolagent secb-run --config config.toml
+```
+
+#### Vulnerability Patching
+
+Generate patches for vulnerabilities:
+
+```bash
+# Set task.type = "patch" in config.toml
+smolagent secb-run --config config.toml
+```
+
+#### Additional Options
+
+```bash
+# Run with custom output directory
+smolagent secb-run --config config.toml --output-dir ./results
+
+# Run with parallel workers
+smolagent secb-run --config config.toml --num-workers 4
+
+# Run for a specific instance
+smolagent secb-run --config config.toml --instance-id wasm3.ossfuzz-42496369
+```
+
+#### Evaluating smolagent Results
+
+After running smolagent, evaluate the results using the standard evaluation command:
+
+```bash
+# For PoC tasks
+python -m secb.evaluator.eval_instances \
+    --input-dir ./results/[timestamp] \
+    --type poc \
+    --split eval \
+    --agent smolagent \
+    --output-dir ./output/eval/poc
+
+# For patch tasks
+python -m secb.evaluator.eval_instances \
+    --input-dir ./results/[timestamp] \
+    --type patch \
+    --split eval \
+    --agent smolagent \
+    --output-dir ./output/eval/patch
+```
 
 ### 📊 Results Viewing
 
